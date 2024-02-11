@@ -15,7 +15,8 @@ wind_sound=pygame.mixer.Sound("data/wind_sound.mp3")
 dash_sound=pygame.mixer.Sound("data/dash_sound.mp3")
 dash_warn_sound=pygame.mixer.Sound("data/dash_warn_sound.mp3")
 rotation_warn_sound=pygame.mixer.Sound("data/rotation_warn_sound.mp3")
-
+rotation_cloud_sound=pygame.mixer.Sound("data/rotation_cloud_sound.mp3")
+teleport_sound=pygame.mixer.Sound("data/teleport_sound.mp3")
 
 def rotate(surface, angle, pivot, offset):
 
@@ -24,6 +25,8 @@ def rotate(surface, angle, pivot, offset):
 
     rect = rotated_image.get_rect(center=pivot+rotated_offset)
     return rotated_image, rect
+
+
 
 pygame.init()
 
@@ -90,6 +93,34 @@ logo_boss=pygame.image.load("data/boss.png")
 dash_trail=pygame.image.load("data/dash_trail.png")
 dash_trail=pygame.transform.scale(dash_trail,(500,200))
 
+rotation_laser=pygame.image.load("data/rotation_beam.png")
+rotation_laser=pygame.transform.scale(rotation_laser,(800,50))
+
+rotation_shine=pygame.image.load("data/rotation_shine.png")
+rotation_shine=pygame.transform.scale(rotation_shine,(300,300))
+
+wind=pygame.image.load("data/wind.png")
+wind=pygame.transform.scale(wind,(1500,700))
+
+wind_up=pygame.transform.rotate(wind,270)
+wind_down=pygame.transform.rotate(wind,90)
+wind_left=pygame.transform.rotate(wind,180)
+wind_right=wind
+
+wind_warn=pygame.image.load("data/wind_warn.png")
+wind_warn=pygame.transform.scale(wind_warn,(600,600))
+wind_warn.set_alpha(50)
+
+wind_warn_up=pygame.transform.rotate(wind,180)
+wind_warn_down=wind_warn
+wind_warn_left=pygame.transform.rotate(wind,90)
+wind_warn_right=pygame.transform.rotate(wind,270)
+
+rotation_up=pygame.transform.rotate(rotation_laser,270)
+rotation_down=pygame.transform.rotate(rotation_laser,90)
+rotation_left=pygame.transform.rotate(rotation_laser,180)
+rotation_right=rotation_laser
+
 
 player_pos=[100,300]
 player_movement=[0,0,0,0]
@@ -133,7 +164,14 @@ dash_col=pygame.rect.Rect(0,0,0,0)
 collision_up=pygame.rect.Rect(0,0,1500,1)
 collision_down=pygame.rect.Rect(0,700,1500,1)
 collision_left=pygame.rect.Rect(0,0,1,700)
-collision_right=pygame.rect.Rect(1450,0,1,700)
+collision_right=pygame.rect.Rect(1500,0,1,700)
+
+wall_up=pygame.rect.Rect(0,0,1500,50)
+wall_down=pygame.rect.Rect(0,650,1500,50)
+wall_left=pygame.rect.Rect(0,0,50,700)
+wall_right=pygame.rect.Rect(1450,0,50,700)
+
+col_rotr_up_laser=pygame.rect.Rect(0,0,0,0)
 
 retry_button=pygame.rect.Rect(600,500,300,150)
 
@@ -270,7 +308,7 @@ while True:
                     player_pos=[100,300]
                     player_movement=[0,0,0,0]
 
-                    tittle=True
+                    tittle=False
 
                     clicked=False
 
@@ -308,6 +346,8 @@ while True:
                     col_boss=pygame.rect.Rect(0,0,0,0)
 
                     dash_col=pygame.rect.Rect(0,0,0,0)
+
+                    col_rotr_up_laser=pygame.rect.Rect(0,0,0,0)
 
                     
 
@@ -413,7 +453,7 @@ while True:
 
     if attack_chose:
         if choise_flag:
-            choise=random.randint(1,1)
+            choise=random.randint(3,3)
             choise_flag=False
             dash_flag=True
             rotation_flag=True
@@ -466,9 +506,327 @@ while True:
             
         if choise==2:
             curent_attack="rotation"
+            
+            if rotation_flag:
+                rotation_flag=False
+                rotation_angle=90
+                rotation_time=0
+                rotation_ofu=pygame.math.Vector2(0,-400)
+                rotation_ofd=pygame.math.Vector2(0,400)
+                rotation_ofl=pygame.math.Vector2(-400,0)
+                rotation_ofr=pygame.math.Vector2(400,0)
+                teleport_sound_flag=True
+                rotation_sound_flag=True
+                rotation_warn_sound_flag=True
+                laser_angle=0
+                boss_rotation_of=pygame.math.Vector2(50,0)
+                ux=0
+                uy=0
+                r_angle=0
+                rot_an=0
+
+                
+
+            if rotation_time>=0 and rotation_time<10:
+                if teleport_sound_flag:
+                    pygame.mixer.Channel(2).play(pygame.mixer.Sound(teleport_sound))
+                    teleport_sound_flag=False
+
+                screen.blit(teleport,(800,200))
+                screen.blit(teleport,(800,250))
+                screen.blit(teleport,(800,300))
+
+            if rotation_time>=10 and rotation_time<30:
+                screen.blit(boss,(750,150))
+
+            if rotation_time>=30 and rotation_time<360:
+
+                if rotation_time>=30 and rotation_time<150:
+                    if rotation_warn_sound_flag:
+                        pygame.mixer.Channel(2).play(pygame.mixer.Sound(rotation_warn_sound))
+                        pygame.mixer.Channel(3).play(pygame.mixer.Sound(rotation_cloud_sound))
+                        rotation_warn_sound_flag=False
+
+                    rot_warn_v=pygame.rect.Rect(725,0,50,700)
+                    rot_warn_h=pygame.rect.Rect(0,325,1500,50)
+                    pygame.draw.rect(screen,(0,150,255),rot_warn_v)
+                    pygame.draw.rect(screen,(0,150,255),rot_warn_h)
+
+                    rot_cloud,cloud_rect=rotate(boss,rotation_angle,(800,400),boss_rotation_of)
+                    screen.blit(boss,(cloud_rect))
+                    col_boss=pygame.rect.Rect(700,300,100,100)
+
+                    rotation_angle+=10
+
+                if rotation_time>=150 and rotation_time<390:
+                    if rotation_sound_flag:
+                        pygame.mixer.Channel(2).play(pygame.mixer.Sound(rotation_sound))
+                        rotation_sound_flag=False
+
+                    rotr_up_laser,rotr_up_rect=rotate(rotation_up,laser_angle,(750,350),rotation_ofu)
+                    screen.blit(rotr_up_laser,(rotr_up_rect))
+
+                    rotr_down_laser,rotr_down_rect=rotate(rotation_down,laser_angle,(750,350),rotation_ofd)
+                    screen.blit(rotr_down_laser,(rotr_down_rect))
+
+                    rotr_left_laser,rotr_left_rect=rotate(rotation_left,laser_angle,(750,350),rotation_ofl)
+                    screen.blit(rotr_left_laser,(rotr_left_rect))
+
+                    rotr_right_laser,rotr_right_rect=rotate(rotation_right,laser_angle,(750,350),rotation_ofr)
+                    screen.blit(rotr_right_laser,(rotr_right_rect))
+
+                    laser_angle+=1
+                    
+                    ux=(800*math.cos(laser_angle/57))+750
+                    uy=(800*math.sin(laser_angle/57))+350
+
+                    col_r_x=750
+                    col_r_y=350
+
+                    dxr=ux-col_r_x
+                    dyr=uy-col_r_y
+                    radsr=math.atan2(-dyr,dxr)
+                    radsr%=2*math.pi
+                    degsr=math.degrees(radsr)
+
+                    ofr=pygame.math.Vector2(0,0)
+                    trrr,rrect=rotate(rotation_up,laser_angle,(col_r_x,col_r_y),ofr)
+
+                    col_r_x=750
+                    col_r_y=350
+                    for i in range(25):
+                        
+                        col_rotr_up_laser=pygame.rect.Rect(col_r_x,col_r_y,25,25)
+
+                        col_r_x+=(dxr)/20
+                        col_r_y+=(dyr)/20
+                        # pygame.draw.rect(screen,(0,0,255),rrect)
+                        # pygame.draw.rect(screen,(255,0,0),col_rotr_up_laser)
+
+                        if pygame.rect.Rect.colliderect(collision_player,col_rotr_up_laser):
+                            retry=True
+
+                    #up
+                        
+                    rx=(800*math.cos((laser_angle+90)/57))+750
+                    ry=(800*math.sin((laser_angle+90)/57))+350
+
+                    col_r_x=750
+                    col_r_y=350
+
+                    dxr=rx-col_r_x
+                    dyr=ry-col_r_y
+                    radsr=math.atan2(-dyr,dxr)
+                    radsr%=2*math.pi
+                    degsr=math.degrees(radsr)
+
+                    ofr=pygame.math.Vector2(0,0)
+                    trrr,rrect=rotate(rotation_right,laser_angle,(col_r_x,col_r_y),ofr)
+
+                    col_r_x=750
+                    col_r_y=350
+                    for i in range(25):
+                        
+                        col_rotr_up_laser=pygame.rect.Rect(col_r_x,col_r_y,25,25)
+
+                        col_r_x+=(dxr)/20
+                        col_r_y+=(dyr)/20
+                        # pygame.draw.rect(screen,(0,0,255),rrect)
+                        # pygame.draw.rect(screen,(255,0,0),col_rotr_up_laser)
+
+                        if pygame.rect.Rect.colliderect(collision_player,col_rotr_up_laser):
+                            retry=True
+
+                    #right
+                        
+                    dx=(800*math.cos((laser_angle+180)/57))+750
+                    dy=(800*math.sin((laser_angle+180)/57))+350
+
+                    col_r_x=750
+                    col_r_y=350
+
+                    dxr=dx-col_r_x
+                    dyr=dy-col_r_y
+                    radsr=math.atan2(-dyr,dxr)
+                    radsr%=2*math.pi
+                    degsr=math.degrees(radsr)
+
+                    ofr=pygame.math.Vector2(0,0)
+                    trrr,rrect=rotate(rotation_down,laser_angle,(col_r_x,col_r_y),ofr)
+
+                    col_r_x=750
+                    col_r_y=350
+                    for i in range(25):
+                        
+                        col_rotr_up_laser=pygame.rect.Rect(col_r_x,col_r_y,25,25)
+
+                        col_r_x+=(dxr)/20
+                        col_r_y+=(dyr)/20
+                        # pygame.draw.rect(screen,(0,0,255),rrect)
+                        # pygame.draw.rect(screen,(255,0,0),col_rotr_up_laser)
+
+                        if pygame.rect.Rect.colliderect(collision_player,col_rotr_up_laser):
+                            retry=True
+
+                    #down
+                        
+                    lx=(800*math.cos((laser_angle+270)/57))+750
+                    ly=(800*math.sin((laser_angle+270)/57))+350
+
+                    col_r_x=750
+                    col_r_y=350
+
+                    dxr=lx-col_r_x
+                    dyr=ly-col_r_y
+                    radsr=math.atan2(-dyr,dxr)
+                    radsr%=2*math.pi
+                    degsr=math.degrees(radsr)
+
+                    ofr=pygame.math.Vector2(0,0)
+                    trrr,rrect=rotate(rotation_left,laser_angle,(col_r_x,col_r_y),ofr)
+
+                    col_r_x=750
+                    col_r_y=350
+                    for i in range(25):
+                        
+                        col_rotr_up_laser=pygame.rect.Rect(col_r_x,col_r_y,25,25)
+
+                        col_r_x+=(dxr)/20
+                        col_r_y+=(dyr)/20
+                        # pygame.draw.rect(screen,(0,0,255),rrect)
+                        # pygame.draw.rect(screen,(255,0,0),col_rotr_up_laser)
+
+                        if pygame.rect.Rect.colliderect(collision_player,col_rotr_up_laser):
+                            retry=True
+
+                    #left
+                        
+                    rotation_angle+=10
+
+                    rot_cloud,cloud_rect=rotate(boss,rotation_angle,(800,400),boss_rotation_of)
+                    screen.blit(boss,(cloud_rect))
+                    screen.blit(rotation_shine,(600,200))
+                    col_boss=pygame.rect.Rect(700,300,100,100)
+
+                if rotation_time>=390 and rotation_time<400:
+
+                    if teleport_sound_flag:
+                        pygame.mixer.Channel(2).play(pygame.mixer.Sound(teleport_sound))
+                        teleport_sound_flag=False
+
+                    screen.blit(teleport,(800,200))
+                    screen.blit(teleport,(800,250))
+                    screen.blit(teleport,(800,300))
+
+            if rotation_time>=400:
+                choise_flag=True
+
+            rotation_time+=1
 
         if choise==3:
             curent_attack="wind"
+
+            if wind_flag:
+                wind_time=0
+                wind_sound_flag=True
+                w2_sound_flag=False
+                wc=[]
+                wh=[]
+                wu=[0,700]
+                wd=[-700,0]
+                wl=[-1500,0]
+                wr=[1500,0]
+
+                for i in range(4):
+                    w_choise=random.randint(1,4)
+                    wh.append(w_choise)
+                    if w_choise==1:
+                        wc.append(wu)
+                    if w_choise==2:
+                        wc.append(wd)
+                    if w_choise==3:
+                        wc.append(wl)
+                    if w_choise==4:
+                        wc.append(wr)
+
+
+            if wind_time>=0 and wind_time<30:
+                if wind_sound_flag:
+                    pygame.mixer.Channel(3).play(pygame.mixer.Sound(dash_warn_sound))
+                    wind_sound_flag=False
+                pygame.draw.rect(screen,(0,150,255),wall_up)
+                pygame.draw.rect(screen,(0,150,255),wall_down)
+                pygame.draw.rect(screen,(0,150,255),wall_left)
+                pygame.draw.rect(screen,(0,150,255),wall_right)
+            
+            if wind_time==30:
+                wind_sound_flag=True
+
+            if wind_time>=30 and wind_time<540:
+                if wind_sound_flag:
+                    pygame.mixer.Channel(3).play(pygame.mixer.Sound(wind_sound))
+                    wind_sound_flag=False
+
+                screen.blit(wall_v,(0,0))
+                screen.blit(wall_v,(1450,0))
+                screen.blit(wall_h,(0,0))
+                screen.blit(wall_h,(0,650))
+
+                le_time=int(pygame.time.get_ticks()/1000)
+
+                if le_time%2==0:
+                    wind_show=True
+                else:
+                    wind_show=False
+                    wind_n=0
+
+                if wind_time>=90 and wind_time<210:
+
+                    if wh[0]==1:
+                        if wind_show:
+                            screen.blit(wind,(wc[0][0],wc[0][1]-wind_n))
+                        player_pos[1]-=7
+
+                        wind_n+=20
+                    if wh[0]==2:
+                        if wind_show:
+                            screen.blit(wind,(wc[0][0],wc[1][1]+wind_n))
+                        player_pos[1]+=7
+
+                        wind_n+=20
+
+
+                    wind_n+=20
+
+                if wind_time>=210 and wind_time<320:
+
+                    if wind_show:
+                        screen.blit(wind,(wc[1][0],wc[1][1]+wind_n))
+                        player_pos[1]+=7
+
+                    wind_n+=20
+
+                if wind_time>=320 and wind_time<430:
+
+                    if wind_show:
+                        screen.blit(wind,(wc[2][0]+wind_n,wc[3][1]))
+
+                    wind_n+=50
+
+                if wind_time>=430 and wind_time<540:
+
+                    if wind_show:
+                        screen.blit(wind,(wc[4][0]-wind_n,wc[4][1]-wind_n))
+
+                    wind_n+=50
+
+                
+            if wind_time>=540:
+                choise_flag=True
+
+            wind_time+=1
+
+
 
     if pygame.rect.Rect.colliderect(collision_player,collision_up):
         player_movement[0]=0
@@ -513,7 +871,7 @@ while True:
 
         col_l_x=player_pos[0]
         col_l_y=player_pos[1]
-        for i in range(50):
+        for i in range(25):
             
             col_rot_laser=pygame.rect.Rect(col_l_x,col_l_y,100,100)
 
