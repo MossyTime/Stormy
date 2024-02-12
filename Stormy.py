@@ -17,6 +17,7 @@ dash_warn_sound=pygame.mixer.Sound("data/dash_warn_sound.mp3")
 rotation_warn_sound=pygame.mixer.Sound("data/rotation_warn_sound.mp3")
 rotation_cloud_sound=pygame.mixer.Sound("data/rotation_cloud_sound.mp3")
 teleport_sound=pygame.mixer.Sound("data/teleport_sound.mp3")
+dash_start_sound=pygame.mixer.Sound("data/dash_start_sound.mp3")
 
 def rotate(surface, angle, pivot, offset):
 
@@ -92,7 +93,11 @@ boss=pygame.transform.scale(boss,(300,200))
 logo_boss=pygame.image.load("data/boss.png")
 
 dash_trail=pygame.image.load("data/dash_trail.png")
+dash_start=pygame.image.load("data/dash_trail.png")
+dash_start=pygame.transform.rotate(dash_start,180)
+dash_start=pygame.transform.scale(dash_start,(300,700))
 dash_trail=pygame.transform.scale(dash_trail,(500,200))
+
 
 rotation_laser=pygame.image.load("data/rotation_beam.png")
 rotation_laser=pygame.transform.scale(rotation_laser,(800,50))
@@ -477,10 +482,27 @@ while True:
 
             if dash_flag:
                 dash_x=1350
-                dash_time=0
+                dash_time=-1
                 dash_flag=False
                 dash_n=0
                 dash_sound_flag=True
+                dash_start_flag=True
+                dash_start_sound_flag=True
+                dash_timer=0
+
+            if dash_start_flag:
+
+                if dash_start_sound_flag:
+                    pygame.mixer.Channel(1).play(pygame.mixer.Sound(dash_start_sound))
+                    dash_start_sound_flag=False
+
+                screen.blit(dash_start,(1200,0))
+
+                dash_timer+=1
+
+                if dash_timer>=120:
+                    dash_start_flag=False
+                    dash_time=0
 
             if dash_time==0:
                 dash_y=random.randint(0,700)
@@ -489,7 +511,7 @@ while True:
             if dash_time>=0 and dash_time<30:
 
                 screen.blit(boss,(dash_x,dash_y))
-                col_boss=pygame.rect.Rect(dash_x,dash_y,300,200)
+                col_boss=pygame.rect.Rect(dash_x+50,dash_y+50,200,150)
 
             if dash_time==30:
                 dash_sound_flag=True
@@ -501,12 +523,12 @@ while True:
 
                 screen.blit(dash_trail,(dash_x+100,dash_y))
                 screen.blit(boss,(dash_x,dash_y))
-                dash_col=pygame.rect.Rect(dash_x,dash_y,300,200)
-                col_boss=pygame.rect.Rect(dash_x,dash_y,300,200)
+                dash_col=pygame.rect.Rect(dash_x+50,dash_y+50,200,150)
+                col_boss=pygame.rect.Rect(dash_x+50,dash_y+50,200,150)
 
                 dash_x-=50
-
-            dash_time+=1
+            if not(dash_start_flag):
+                dash_time+=1
 
             if dash_time==60:
                 dash_col=pygame.rect.Rect(dash_x,dash_y,0,0)
