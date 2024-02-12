@@ -1248,7 +1248,7 @@ while True:
 
             if pygame.Rect.colliderect(col_rot_laser,col_boss):
                 if not(phase2):
-                    hp-=2
+                    hp-=4
                 else:
                     hp-=3
 
