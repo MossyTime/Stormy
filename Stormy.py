@@ -71,7 +71,8 @@ laser=pygame.transform.scale(laser,(1600,70))
 
 lightning=pygame.image.load("data/lightning.png")
 
-wall_v=pygame.transform.scale(lightning,(50,700))
+wall_v=pygame.transform.rotate(lightning,90)
+wall_v=pygame.transform.scale(wall_v,(50,700))
 wall_h=pygame.transform.scale(lightning,(1500,50))
 
 teleport=pygame.transform.scale(lightning,(300,50))
@@ -170,6 +171,11 @@ wall_up=pygame.rect.Rect(0,0,1500,50)
 wall_down=pygame.rect.Rect(0,650,1500,50)
 wall_left=pygame.rect.Rect(0,0,50,700)
 wall_right=pygame.rect.Rect(1450,0,50,700)
+
+wall_u=pygame.rect.Rect(0,0,1500,0)
+wall_d=pygame.rect.Rect(0,690,1500,0)
+wall_l=pygame.rect.Rect(0,0,0,700)
+wall_r=pygame.rect.Rect(1490,0,0,700)
 
 col_rotr_up_laser=pygame.rect.Rect(0,0,0,0)
 
@@ -341,6 +347,11 @@ while True:
                     collision_left=pygame.rect.Rect(0,0,1,700)
                     collision_right=pygame.rect.Rect(1450,0,1,700)
 
+                    wall_u=pygame.rect.Rect(0,0,1500,0)
+                    wall_d=pygame.rect.Rect(0,690,1500,0)
+                    wall_l=pygame.rect.Rect(0,0,0,700)
+                    wall_r=pygame.rect.Rect(1490,0,0,700)
+
                     retry_button=pygame.rect.Rect(600,500,300,150)
 
                     col_boss=pygame.rect.Rect(0,0,0,0)
@@ -453,7 +464,7 @@ while True:
 
     if attack_chose:
         if choise_flag:
-            choise=random.randint(3,3)
+            choise=random.randint(1,3)
             choise_flag=False
             dash_flag=True
             rotation_flag=True
@@ -729,13 +740,28 @@ while True:
             if wind_flag:
                 wind_time=0
                 wind_sound_flag=True
-                w2_sound_flag=False
+                boss_rot_angle=0
+
+                wind_bp=(-500,-500)
+                
+                wind_n=[0,0]
+
                 wc=[]
                 wh=[]
+
                 wu=[0,700]
                 wd=[-700,0]
                 wl=[-1500,0]
                 wr=[1500,0]
+
+                boss_cw=(0,0)
+
+                wall_u=pygame.rect.Rect(0,0,1500,40)
+                wall_d=pygame.rect.Rect(0,660,1500,40)
+                wall_l=pygame.rect.Rect(0,0,40,700)
+                wall_r=pygame.rect.Rect(1460,0,40,700)
+
+                wind_flag=False
 
                 for i in range(4):
                     w_choise=random.randint(1,4)
@@ -776,53 +802,128 @@ while True:
 
                 if le_time%2==0:
                     wind_show=True
+
                 else:
                     wind_show=False
-                    wind_n=0
+                    wind_n=[0,0]
 
                 if wind_time>=90 and wind_time<210:
 
+                    if wind_show:
+                        screen.blit(wind,(wind_n[0],wind_n[1]))
+                    
                     if wh[0]==1:
-                        if wind_show:
-                            screen.blit(wind,(wc[0][0],wc[0][1]-wind_n))
-                        player_pos[1]-=7
-
-                        wind_n+=20
-                    if wh[0]==2:
-                        if wind_show:
-                            screen.blit(wind,(wc[0][0],wc[1][1]+wind_n))
-                        player_pos[1]+=7
-
-                        wind_n+=20
-
-
-                    wind_n+=20
+                        player_pos[1]-=6
+                        wind_n[1]-=20
+                        wind_bp=(750,700)
+                        boss_cw=(550,600)
+                    elif wh[0]==2:
+                        player_pos[1]+=6
+                        wind_n[1]+=20
+                        wind_bp=(750,0)
+                        boss_cw=(550,-100)
+                    elif wh[0]==3:
+                        player_pos[0]-=9
+                        wind_n[0]-=20
+                        wind_bp=(1500,350)
+                        boss_cw=(1350,250)
+                    elif wh[0]==4:
+                        player_pos[0]+=9
+                        wind_n[0]+=20
+                        wind_bp=(0,350)
+                        boss_cw=(-150,150)
 
                 if wind_time>=210 and wind_time<320:
 
                     if wind_show:
-                        screen.blit(wind,(wc[1][0],wc[1][1]+wind_n))
-                        player_pos[1]+=7
-
-                    wind_n+=20
+                        screen.blit(wind,(wind_n[0],wind_n[1]))
+                    if wh[1]==1:
+                        player_pos[1]-=6
+                        wind_n[1]-=20
+                        wind_bp=(750,700)
+                        boss_cw=(550,600)
+                    elif wh[1]==2:
+                        player_pos[1]+=6
+                        wind_n[1]+=20
+                        wind_bp=(750,0)
+                        boss_cw=(550,-100)
+                    elif wh[1]==3:
+                        player_pos[0]-=9
+                        wind_n[0]-=20
+                        wind_bp=(1500,350)
+                        boss_cw=(1350,250)
+                    elif wh[1]==4:
+                        player_pos[0]+=9
+                        wind_n[0]+=20
+                        wind_bp=(0,350)
+                        boss_cw=(-150,150)
 
                 if wind_time>=320 and wind_time<430:
 
                     if wind_show:
-                        screen.blit(wind,(wc[2][0]+wind_n,wc[3][1]))
-
-                    wind_n+=50
+                        screen.blit(wind,(wind_n[0],wind_n[1]))
+                    if wh[2]==1:
+                        player_pos[1]-=6
+                        wind_n[1]-=20
+                        wind_bp=(750,700)
+                        boss_cw=(550,600)
+                    elif wh[2]==2:
+                        player_pos[1]+=6
+                        wind_n[1]+=20
+                        wind_bp=(750,0)
+                        boss_cw=(550,-100)
+                    elif wh[2]==3:
+                        player_pos[0]-=9
+                        wind_n[0]-=20
+                        wind_bp=(1500,350)
+                        boss_cw=(1350,250)
+                    elif wh[2]==4:
+                        player_pos[0]+=9
+                        wind_n[0]+=20
+                        wind_bp=(0,350)
+                        boss_cw=(-150,150)
 
                 if wind_time>=430 and wind_time<540:
 
                     if wind_show:
-                        screen.blit(wind,(wc[4][0]-wind_n,wc[4][1]-wind_n))
+                        screen.blit(wind,(wind_n[0],wind_n[1]))
+                    if wh[3]==1:
+                        player_pos[1]-=6
+                        wind_n[1]-=20
+                        wind_bp=(750,700)
+                        boss_cw=(550,600)
+                    elif wh[3]==2:
+                        player_pos[1]+=6
+                        wind_n[1]+=20
+                        wind_bp=(750,0)
+                        boss_cw=(550,-100)
+                    elif wh[3]==3:
+                        player_pos[0]-=9
+                        wind_n[0]-=20
+                        wind_bp=(1500,350)
+                        boss_cw=(1350,250)
+                    elif wh[3]==4:
+                        player_pos[0]+=9
+                        wind_n[0]+=20
+                        wind_bp=(0,350)
+                        boss_cw=(-150,150)
 
-                    wind_n+=50
+                    
 
+                of=pygame.math.Vector2(50,0)
+                rot_boss,rect=rotate(boss,boss_rot_angle,(wind_bp),of)
+                screen.blit(boss,(rect[0]+50,rect[1]+50))
+                col_boss=pygame.rect.Rect(boss_cw[0],boss_cw[1],300,200)
+
+                boss_rot_angle+=1
                 
             if wind_time>=540:
+                wall_u=pygame.rect.Rect(0,0,1500,0)
+                wall_d=pygame.rect.Rect(0,690,1500,0)
+                wall_l=pygame.rect.Rect(0,0,0,700)
+                wall_r=pygame.rect.Rect(1490,0,0,700)
                 choise_flag=True
+                boss_rot_angle=0
 
             wind_time+=1
 
@@ -844,6 +945,18 @@ while True:
     if pygame.rect.Rect.colliderect(collision_player,dash_col):
         retry=True
 
+    if pygame.rect.Rect.colliderect(collision_player,wall_u):
+        retry=True
+
+    if pygame.rect.Rect.colliderect(collision_player,wall_d):
+        retry=True
+
+    if pygame.rect.Rect.colliderect(collision_player,wall_l):
+        retry=True
+
+    if pygame.rect.Rect.colliderect(collision_player,wall_r):
+        retry=True
+
     player_pos[0]+=player_movement[2]
     player_pos[0]+=player_movement[3]
     player_pos[1]+=player_movement[0]
@@ -852,6 +965,9 @@ while True:
     mouse_pos=pygame.mouse.get_pos()
     mouse_x=pygame.mouse.get_pos()[0]
     mouse_y=pygame.mouse.get_pos()[1]
+
+    health_bar=pygame.rect.Rect(250,0,hp/25.0,10)
+    pygame.draw.rect(screen,(255,0,0),health_bar)
 
     if clicked:
         mouse_y-=50
@@ -866,8 +982,7 @@ while True:
         of=pygame.math.Vector2(850,0)
         rot_laser,rect=rotate(laser,-degs,player_pos,of)
         screen.blit(rot_laser,(rect[0]+50,rect[1]+50))
-    
-        screen.blit(ball,(player_pos[0]-25,player_pos[1]-25))
+
 
         col_l_x=player_pos[0]
         col_l_y=player_pos[1]
@@ -888,7 +1003,7 @@ while True:
             col_l_y+=(ny*rect[3])/20
 
             if pygame.Rect.colliderect(col_rot_laser,col_boss):
-                hp-=1
+                hp-=2.5
 
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
