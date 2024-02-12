@@ -458,7 +458,9 @@ while True:
     #end of boss prep
 
     screen.fill((0,0,0))
-    screen.blit(bg,(0,0)) 
+    screen.blit(bg,(0,0))
+    if clicked:
+        screen.blit(ball,(player_pos[0]-25,player_pos[1]-25)) 
     screen.blit(player,player_pos)
     collision_player=pygame.rect.Rect(player_pos[0]+15,player_pos[1]+15,70,70)
 
@@ -979,7 +981,7 @@ while True:
         rads%=2*math.pi
         degs=math.degrees(rads)
 
-        of=pygame.math.Vector2(850,0)
+        of=pygame.math.Vector2(840,0)
         rot_laser,rect=rotate(laser,-degs,player_pos,of)
         screen.blit(rot_laser,(rect[0]+50,rect[1]+50))
 
@@ -1003,7 +1005,7 @@ while True:
             col_l_y+=(ny*rect[3])/20
 
             if pygame.Rect.colliderect(col_rot_laser,col_boss):
-                hp-=2.5
+                hp-=2
 
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
