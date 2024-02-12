@@ -18,6 +18,9 @@ rotation_warn_sound=pygame.mixer.Sound("data/rotation_warn_sound.mp3")
 rotation_cloud_sound=pygame.mixer.Sound("data/rotation_cloud_sound.mp3")
 teleport_sound=pygame.mixer.Sound("data/teleport_sound.mp3")
 dash_start_sound=pygame.mixer.Sound("data/dash_start_sound.mp3")
+target_lock_sound=pygame.mixer.Sound("data/target_lock_sound.mp3")
+end_sound=pygame.mixer.Sound("data/end_sound.mp3")
+
 
 def rotate(surface, angle, pivot, offset):
 
@@ -53,7 +56,7 @@ text_tittle_prep=my_font.render("I present", False, (255, 150, 50))
 text_tittle_prep=pygame.transform.scale(text_tittle_prep,(600,200))
 
 text_tittle_shadow=my_font.render("Stormy", False, (0, 0, 0))
-text_tittle_shadow=pygame.transform.scale(text_tittle_shadow,(600,200))\
+text_tittle_shadow=pygame.transform.scale(text_tittle_shadow,(600,200))
 
 text_retry=my_font.render("Never Give Up", False, (255, 0, 100))
 text_retry=pygame.transform.scale(text_retry,(600,200))
@@ -77,9 +80,16 @@ wall_v=pygame.transform.scale(wall_v,(50,700))
 wall_h=pygame.transform.scale(lightning,(1500,50))
 
 teleport=pygame.transform.scale(lightning,(300,50))
+final_light=pygame.transform.scale(lightning,(1500,200))
 
 ball=pygame.image.load("data/ball.png")
 ball=pygame.transform.scale(ball,(150,150))
+
+explosion=pygame.image.load("data/boss_death.png")
+explosion=pygame.transform.scale(explosion,(200,200))
+
+cloud=pygame.image.load("data/cloud.png")
+cloud=pygame.transform.scale(cloud,(400,300))
 
 ball_boss=pygame.image.load("data/ball_boss.png")
 ball_boss=pygame.transform.scale(ball_boss,(400,400))
@@ -94,16 +104,21 @@ logo_boss=pygame.image.load("data/boss.png")
 
 dash_trail=pygame.image.load("data/dash_trail.png")
 dash_start=pygame.image.load("data/dash_trail.png")
+fakeout_glow=pygame.image.load("data/dash_trail.png")
+fakeout_glow=pygame.transform.rotate(fakeout_glow,90)
+fakeout_glow=pygame.transform.scale(fakeout_glow,(500,300))
 dash_start=pygame.transform.rotate(dash_start,180)
 dash_start=pygame.transform.scale(dash_start,(300,700))
 dash_trail=pygame.transform.scale(dash_trail,(500,200))
-
 
 rotation_laser=pygame.image.load("data/rotation_beam.png")
 rotation_laser=pygame.transform.scale(rotation_laser,(800,50))
 
 rotation_shine=pygame.image.load("data/rotation_shine.png")
 rotation_shine=pygame.transform.scale(rotation_shine,(300,300))
+
+space=pygame.image.load("data/phase2_background.png")
+space=pygame.transform.scale(space,(1500,700))
 
 wind=pygame.image.load("data/wind.png")
 wind=pygame.transform.scale(wind,(1500,700))
@@ -126,7 +141,6 @@ rotation_up=pygame.transform.rotate(rotation_laser,270)
 rotation_down=pygame.transform.rotate(rotation_laser,90)
 rotation_left=pygame.transform.rotate(rotation_laser,180)
 rotation_right=rotation_laser
-
 
 player_pos=[100,300]
 player_movement=[0,0,0,0]
@@ -164,6 +178,14 @@ boss_prep=True
 boss_prep_flag=True
 
 choise_flag=True
+
+fakeout=False
+
+fakeout_flag=True
+
+phase2=False
+
+final_col=pygame.rect.Rect(0,0,0,0)
 
 dash_col=pygame.rect.Rect(0,0,0,0)
 
@@ -347,6 +369,14 @@ while True:
 
                     choise_flag=True
 
+                    fakeout=False
+
+                    fakeout_flag=True
+
+                    phase2=False
+
+                    final_col=pygame.rect.Rect(0,0,0,0)
+
                     collision_up=pygame.rect.Rect(0,0,1500,1)
                     collision_down=pygame.rect.Rect(0,700,1500,1)
                     collision_left=pygame.rect.Rect(0,0,1,700)
@@ -375,7 +405,194 @@ while True:
     #end of retry
         
     if hp<=0:
-        victory=True
+        if not(phase2):
+            fakeout=True
+        else:
+            victory=True
+            end_sound_flag=True
+
+    while fakeout:
+        if fakeout_flag:
+            fakeout_time=0
+            fakeout_flag=False
+            fall_down=250
+            bg_down=0
+            space_down=-700
+            clouds_down=-100
+            pygame.mixer_music.load("data/phase2_intro_music.mp3")
+            pygame.mixer_music.play()
+            pygame.mixer.Sound.play(explosion_sound)
+
+        screen.fill((0,0,0))
+
+        if fakeout_time>=0 and fakeout_time<300:
+            screen.blit(bg,(0,0))
+            screen.blit(boss,(600,fall_down))
+
+            ex_x=random.randint(600,700)
+            screen.blit(explosion,(ex_x,fall_down))
+
+            fall_down+=1.5
+
+        if fakeout_time==300:
+            pygame.mixer.Sound.stop(explosion_sound)
+            pygame.mixer.Sound.play(dash_start_sound)
+            fall_down=700
+        
+        if fakeout_time>=300 and fakeout_time<420:
+            screen.blit(bg,(0,0))
+            screen.blit(fakeout_glow,(500,400))
+
+        if fakeout_time>=420 and fakeout_time<480:
+            screen.blit(bg,(0,0))
+            screen.blit(boss,(600,fall_down))
+
+            fall_down-=7.5
+
+        if fakeout_time>=480 and fakeout_time<660:
+
+            screen.blit(bg,(0,bg_down))
+            screen.blit(space,(0,space_down))
+            cloud_x=-200
+            for i in range(20):
+                screen.blit(cloud,(cloud_x,clouds_down))
+                cloud_x+=100
+            bg_down+=3.888
+            space_down+=3.888
+            clouds_down+=3.9
+            screen.blit(boss,(600,250))
+
+        if fakeout_time>=660 and fakeout_time<720:
+            screen.blit(space,(0,0))
+            screen.blit(boss,(600,250))
+
+        if fakeout_time==720:
+            pygame.mixer.Sound.play(teleport_sound)
+
+        if fakeout_time>=720 and fakeout_time<810:
+            screen.blit(space,(0,0))
+            screen.blit(wall_v,(0,0))
+            screen.blit(boss,(600,250))
+
+        if fakeout_time>=810:
+            fakeout=False
+            attack_chose=False
+            phase2=True
+            clicked=False
+            boss_music_flag=True
+            hp=20000
+
+        fakeout_time+=1
+
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        player_pos=[300,280]
+        player_movement=[0,0,0,0]
+
+        screen.blit(player,player_pos)
+        
+        pygame.display.update()
+        clock.tick(60)
+    #end of fakeout
+        
+    screen.fill((0,0,0))
+         
+    if phase2:
+
+        if boss_music_flag:
+            pygame.mixer_music.load("data/phase2_music.mp3")
+            pygame.mixer_music.play(-1)
+            bg1_x=0
+            bg2_x=1500
+            boss_music_flag=False
+            phase2_time=0
+        
+        if bg2_x>0:
+            screen.blit(space,(bg1_x,0))
+        screen.blit(space,(bg2_x,0))
+
+        if bg1_x==-1500:
+            bg1_x=0
+        if bg2_x==0:
+            bg2_x=1500
+
+        bg1_x-=20
+        bg2_x-=20
+
+        player_pos[0]-=9
+
+        screen.blit(boss,(1100,250))
+        col_boss=pygame.rect.Rect(900,150,300,200)
+
+        if phase2_time==0:
+            pygame.mixer.Channel(6).play(pygame.mixer.Sound(target_lock_sound))
+
+        if phase2_time>=0 and phase2_time<60:
+            if phase2_time%2==0:
+                pygame.draw.circle(screen,(0,100,255),(player_pos[0]+50,player_pos[1]+50),70)
+
+            else:
+                pygame.draw.circle(screen,(255,255,0),(player_pos[0]+50,player_pos[1]+50),70)
+
+        if phase2_time==60:
+            final_x=player_pos[0]
+            final_y=player_pos[1]
+
+        if phase2_time>=60 and phase2_time<120:
+            pygame.draw.circle(screen,(255,0,0),(final_x+50,final_y+50),70)
+
+        if phase2_time==120:
+            final_x-=50
+            pygame.mixer.Channel(7).play(pygame.mixer.Sound(teleport_sound))
+            dx=final_x-1250
+            dy=final_y-350
+            rads=math.atan2(-dy,dx)
+            rads%=2*math.pi
+            degs=math.degrees(rads)
+
+            of=pygame.math.Vector2(800,0)
+            rot_light,rect_light=rotate(final_light,-degs,(1250,350),of)
+
+        if phase2_time>=120 and phase2_time<140:
+            
+            screen.blit(rot_light,(rect_light[0]+50,rect_light[1]+50))
+            final_col=pygame.rect.Rect(final_x,final_y,100,100)
+
+        phase2_time+=1
+
+        if phase2_time>=140:
+
+            final_col=pygame.rect.Rect(0,0,0,0)
+            phase2_time=0
+
+        screen.blit(wall_v,(0,0))
+        wall_l=pygame.rect.Rect(0,0,40,700)
+        
+
+    while victory:
+        end_screen=pygame.rect.Rect(0,0,1500,700)
+        if end_sound_flag:
+            pygame.mixer_music.stop()
+            pygame.mixer_music.load("data/phase2_outro_music.mp3")
+            pygame.mixer_music.play()
+            pygame.mixer.Channel(1).play(end_sound)
+            pygame.mixer.Channel(2).play(roar_sound)
+            end_sound_flag=False
+
+        screen.fill((0,0,0))
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.draw.rect(screen,(255,255,255),end_screen)
+
+        pygame.display.update()
+        clock.tick(60)
+
 
     if boss_music_flag:
 
@@ -462,8 +679,8 @@ while True:
         clock.tick(60)
     #end of boss prep
 
-    screen.fill((0,0,0))
-    screen.blit(bg,(0,0))
+    if not(phase2):
+        screen.blit(bg,(0,0))
     if clicked:
         screen.blit(ball,(player_pos[0]-25,player_pos[1]-25)) 
     screen.blit(player,player_pos)
@@ -981,6 +1198,9 @@ while True:
     if pygame.rect.Rect.colliderect(collision_player,wall_r):
         retry=True
 
+    if pygame.rect.Rect.colliderect(collision_player,final_col):
+        retry=True
+
     player_pos[0]+=player_movement[2]
     player_pos[0]+=player_movement[3]
     player_pos[1]+=player_movement[0]
@@ -1027,7 +1247,10 @@ while True:
             col_l_y+=(ny*rect[3])/20
 
             if pygame.Rect.colliderect(col_rot_laser,col_boss):
-                hp-=2
+                if not(phase2):
+                    hp-=2
+                else:
+                    hp-=3
 
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
