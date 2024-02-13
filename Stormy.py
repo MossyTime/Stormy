@@ -169,6 +169,7 @@ attack_chose=True
 
 hp=20000
 
+
 tittle_prep=0
 
 tittle_prep_flag=True
@@ -504,6 +505,7 @@ while True:
 
         if boss_music_flag:
             pygame.mixer_music.load("data/phase2_music.mp3")
+            pygame.mixer_music.set_volume(10)
             pygame.mixer_music.play(-1)
             bg1_x=0
             bg2_x=1500
